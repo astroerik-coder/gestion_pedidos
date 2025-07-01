@@ -93,13 +93,21 @@ public class RabbitMQConfig {
 
         // ✅ CORRECTO: mapeo cruzado entre paquete del productor y clase del consumidor
         idClassMapping.put(
-                "com.example.demo.models.dto.PedidoListoParaPagarEvent",
+                "com.example.despachos.models.dto.PedidoListoParaPagarEvent",
                 com.example.pedidos.models.dto.PedidoListoParaPagarEvent.class);
 
         idClassMapping.put(
-            "com.example.demo.models.dto.PagoExitosoEvent",
-            com.example.pedidos.models.dto.PagoExitosoEvent.class); // 👈 Este es el importante
-        classMapper.setIdClassMapping(idClassMapping);
+                "com.example.pagos.models.dto.PagoExitosoEvent", // Tipo remoto (del servicio de pagos)
+                com.example.pedidos.models.dto.PagoExitosoEvent.class); // Tipo local
+
+        classMapper.setIdClassMapping(idClassMapping); // 👈 FALTABA ESTO
+
+        classMapper.setTrustedPackages(
+                "java.util",
+                "java.lang",
+                "com.example.inventario.models.dto",
+                "com.example.despachos.models.dto",
+                "com.example.pagos.models.dto");
         converter.setClassMapper(classMapper);
         return converter;
     }

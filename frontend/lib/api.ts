@@ -1,239 +1,85 @@
-// Simulación de API para conectar con microservicios Spring Boot
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080/api";
+// API de Autenticación
+const API_AUTH = process.env.API_MICRO_AUTH ?? "http://localhost:8080/api";
+// API de Pedidos
+const API_PEDIDOS =
+  process.env.API_MICRO_PEDIDOS ?? "http://localhost:8082/api";
+// API de Despacho
+const API_DESPACHO =
+  process.env.API_MICRO_DESPACHO ?? "http://localhost:8083/api";
+// API de Inventario
 const API_INVENTORY =
   process.env.API_MICRO_INVENTORY ?? "http://localhost:8084/api";
+//API DE DETALLE DE PEDIDO
+const API_DETALLE_PEDIDO =
+  process.env.API_MICRO_DETALLE_PEDIDO ?? "http://localhost:8085/api";
+// API de Cobros
+const API_COBROS = process.env.API_MICRO_COBROS ?? "http://localhost:8086/api";
+//API de despachos
+const API_DESPACHOS =
+  process.env.API_MICRO_DESPACHOS ?? "http://localhost:8087/api";
+//API DE envios
+const API_ENVIOS = process.env.API_MICRO_ENVIOS ?? "http://localhost:8088/api";
 
 // Configuración de headers para las peticiones
-const getHeaders = () => ({
-  "Content-Type": "application/json",
-  Authorization: `Bearer ${localStorage.getItem("token") || ""}`,
-});
+const getHeaders = () => {
+  const token = localStorage.getItem("token");
 
-// Servicio de Órdenes
-export const ordersAPI = {
-  // Crear nueva orden
-  createOrder: async (orderData: any) => {
-    const response = await fetch(`${API_BASE_URL}/orders`, {
-      method: "POST",
-      headers: getHeaders(),
-      body: JSON.stringify(orderData),
-    });
-    return response.json();
-  },
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
 
-  // Obtener todas las órdenes
-  getOrders: async () => {
-    const response = await fetch(`${API_BASE_URL}/orders`, {
-      headers: getHeaders(),
-    });
-    return response.json();
-  },
-
-  // Actualizar estado de orden
-  updateOrderStatus: async (orderId: string, status: string) => {
-    const response = await fetch(`${API_BASE_URL}/orders/${orderId}/status`, {
-      method: "PUT",
-      headers: getHeaders(),
-      body: JSON.stringify({ status }),
-    });
-    return response.json();
-  },
-
-  // Obtener orden por ID
-  getOrderById: async (orderId: string) => {
-    const response = await fetch(`${API_BASE_URL}/orders/${orderId}`, {
-      headers: getHeaders(),
-    });
-    return response.json();
-  },
-};
-
-// Servicio de Inventario
-export const inventoryAPI = {
-  // Obtener inventario completo
-  getInventory: async () => {
-    const response = await fetch(`${API_BASE_URL}/inventory`, {
-      headers: getHeaders(),
-    });
-    return response.json();
-  },
-
-  // Disminuir stock
-  decreaseStock: async (productId: string, quantity: number) => {
-    const response = await fetch(
-      `${API_BASE_URL}/inventory/${productId}/decrease`,
-      {
-        method: "PUT",
-        headers: getHeaders(),
-        body: JSON.stringify({ quantity }),
-      }
-    );
-    return response.json();
-  },
-
-  // Liberar stock (vía MuleSoft para excepciones)
-  releaseStock: async (productId: string, quantity: number) => {
-    const response = await fetch(
-      `${API_BASE_URL}/inventory/${productId}/release`,
-      {
-        method: "PUT",
-        headers: getHeaders(),
-        body: JSON.stringify({ quantity }),
-      }
-    );
-    return response.json();
-  },
-};
-
-// Servicio de Despacho
-export const dispatchAPI = {
-  // Cambiar estado de despacho
-  updateDispatchStatus: async (orderId: string, status: string) => {
-    const response = await fetch(`${API_BASE_URL}/dispatch/${orderId}/status`, {
-      method: "PUT",
-      headers: getHeaders(),
-      body: JSON.stringify({ status }),
-    });
-    return response.json();
-  },
-
-  // Marcar como listo para envío
-  markReadyToShip: async (orderId: string) => {
-    const response = await fetch(`${API_BASE_URL}/dispatch/${orderId}/ready`, {
-      method: "POST",
-      headers: getHeaders(),
-    });
-    return response.json();
-  },
-};
-
-// Servicio de Cobros
-export const paymentsAPI = {
-  // Simular pago
-  processPayment: async (paymentData: any) => {
-    const response = await fetch(`${API_BASE_URL}/payments/process`, {
-      method: "POST",
-      headers: getHeaders(),
-      body: JSON.stringify(paymentData),
-    });
-    return response.json();
-  },
-
-  // Obtener estado de pago
-  getPaymentStatus: async (paymentId: string) => {
-    const response = await fetch(
-      `${API_BASE_URL}/payments/${paymentId}/status`,
-      {
-        headers: getHeaders(),
-      }
-    );
-    return response.json();
-  },
-};
-
-// Servicio de Envío
-export const shippingAPI = {
-  // Actualizar estado de envío
-  updateShippingStatus: async (orderId: string, status: string) => {
-    const response = await fetch(`${API_BASE_URL}/shipping/${orderId}/status`, {
-      method: "PUT",
-      headers: getHeaders(),
-      body: JSON.stringify({ status }),
-    });
-    return response.json();
-  },
-
-  // Obtener información de envío
-  getShippingInfo: async (orderId: string) => {
-    const response = await fetch(`${API_BASE_URL}/shipping/${orderId}`, {
-      headers: getHeaders(),
-    });
-    return response.json();
-  },
-};
-
-// Servicio de Autenticación
-export const authAPI = {
-  // Login
-  login: async (credentials: { email: string; password: string }) => {
-    const response = await fetch(`${API_BASE_URL}/auth/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(credentials),
-    });
-    return response.json();
-  },
-
-  // Logout
-  logout: async () => {
-    const response = await fetch(`${API_BASE_URL}/auth/logout`, {
-      method: "POST",
-      headers: getHeaders(),
-    });
-    return response.json();
-  },
-
-  // Verificar token
-  verifyToken: async () => {
-    const response = await fetch(`${API_BASE_URL}/auth/verify`, {
-      headers: getHeaders(),
-    });
-    return response.json();
-  },
-};
-
-// Utilidades para manejo de errores
-export const handleAPIError = (error: any) => {
-  console.error("API Error:", error);
-
-  if (error.status === 401) {
-    // Token expirado o inválido
-    localStorage.removeItem("token");
-    window.location.href = "/login";
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
   }
 
-  return {
-    success: false,
-    message: error.message || "Error en la comunicación con el servidor",
-  };
+  return headers;
 };
 
-// Interceptor para RabbitMQ events (simulado)
-export const rabbitMQEvents = {
-  // Suscribirse a eventos de órdenes
-  subscribeToOrderEvents: (callback: (event: any) => void) => {
-    // Simulación de WebSocket o Server-Sent Events
-    const eventSource = new EventSource(`${API_BASE_URL}/events/orders`);
-    eventSource.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      callback(data);
-    };
-    return eventSource;
+//✅Login y Register
+export const authAPI = {
+  // Login
+  login: async (credentials: { nombreUsuario: string; contraseña: string }) => {
+    const response = await fetch(`${API_AUTH}/auth/login`, {
+      method: "POST",
+      headers: getHeaders(),
+      body: JSON.stringify(credentials),
+    });
+    return response;
   },
 
-  // Suscribirse a eventos de inventario
-  subscribeToInventoryEvents: (callback: (event: any) => void) => {
-    const eventSource = new EventSource(`${API_BASE_URL}/events/inventory`);
-    eventSource.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      callback(data);
-    };
-    return eventSource;
+  // Registro como CLIENTE
+  register: async (data: {
+    nombreUsuario: string;
+    correo: string;
+    contraseña: string;
+    rol: string;
+  }) => {
+    const response = await fetch(`${API_AUTH}/auth/registro`, {
+      method: "POST",
+      headers: getHeaders(),
+      body: JSON.stringify(data),
+    });
+    return response;
+  },
+  // Perfil
+  perfil: async () => {
+    const response = await fetch(`${API_AUTH}/auth/perfil`, {
+      headers: getHeaders(),
+    });
+    return response.json();
   },
 
-  // Suscribirse a eventos de pagos
-  subscribeToPaymentEvents: (callback: (event: any) => void) => {
-    const eventSource = new EventSource(`${API_BASE_URL}/events/payments`);
-    eventSource.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      callback(data);
-    };
-    return eventSource;
+  // Logout (opcional)
+  logout: async () => {
+    const response = await fetch(`${API_AUTH}/auth/logout`, {
+      method: "POST",
+      headers: getHeaders(),
+    });
+    return response.json();
   },
 };
 
-//Inventario
+// ✅Inventario
 export const inventarioAPI = {
   // Insertar producto
   insertInventory: async (inventaryData: any) => {
@@ -297,5 +143,294 @@ export const inventarioAPI = {
     });
     const data = await response.json();
     return data;
+  },
+};
+
+// ✅Pedidos
+export const pedidosAPI = {
+  // Crear nuevo pedido
+  createPedido: async (pedidoData: {
+    idCliente: number;
+    total: number;
+    lineas: Array<{
+      idProducto: number;
+      cantidad: number;
+      precioUnitario: number;
+    }>;
+  }) => {
+    const response = await fetch(`${API_PEDIDOS}/pedidos`, {
+      method: "POST",
+      headers: getHeaders(),
+      body: JSON.stringify(pedidoData),
+    });
+
+    if (!response.ok) {
+      const error = await response.text();
+      throw new Error(`Error al crear pedido: ${error}`);
+    }
+
+    return response.json();
+  },
+
+  // Obtener pedido por ID
+  getPedidoById: async (pedidoId: number) => {
+    const response = await fetch(`${API_PEDIDOS}/pedidos/${pedidoId}`, {
+      headers: getHeaders(),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Error al obtener pedido: ${response.status}`);
+    }
+
+    return response.json();
+  },
+
+  // Obtener pedidos de un cliente
+  getPedidosByCliente: async (clienteId: number) => {
+    const response = await fetch(
+      `${API_PEDIDOS}/pedidos/cliente/${clienteId}`,
+      {
+        headers: getHeaders(),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(
+        `Error al obtener pedidos del cliente: ${response.status}`
+      );
+    }
+
+    const data = await response.json();
+    // Manejar respuesta paginada
+    return data.content || data;
+  },
+
+  // Obtener todos los pedidos (para admin)
+  getAllPedidos: async () => {
+    const response = await fetch(`${API_PEDIDOS}/pedidos`, {
+      headers: getHeaders(),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Error al obtener todos los pedidos: ${response.status}`);
+    }
+
+    const data = await response.json();
+    // Manejar respuesta paginada
+    return data.content || data;
+  },
+
+  // Eliminar pedido (eliminado lógico)
+  deletePedido: async (pedidoId: number) => {
+    const response = await fetch(`${API_PEDIDOS}/pedidos/${pedidoId}`, {
+      method: "DELETE",
+      headers: getHeaders(),
+    });
+
+    if (!response.ok) {
+      const error = await response.text();
+      throw new Error(`Error al eliminar pedido: ${error}`);
+    }
+
+    return response.json();
+  },
+
+  // Actualizar estado del pedido (solo para ADMIN)
+  updatePedidoEstado: async (pedidoId: number, estado: string) => {
+    const response = await fetch(`${API_PEDIDOS}/pedidos/${pedidoId}/estado`, {
+      method: "PUT",
+      headers: getHeaders(),
+      body: JSON.stringify({ estado }),
+    });
+
+    if (!response.ok) {
+      const error = await response.text();
+      throw new Error(`Error al actualizar estado: ${error}`);
+    }
+
+    return response.json();
+  },
+
+  // Aprobar pedido (cambiar de PENDIENTE_APROBACION a Procesando)
+  approvePedido: async (pedidoId: number) => {
+    const response = await fetch(`${API_PEDIDOS}/pedidos/${pedidoId}/aprobar`, {
+      method: "PUT",
+      headers: getHeaders(),
+    });
+
+    if (!response.ok) {
+      const error = await response.text();
+      throw new Error(`Error al aprobar pedido: ${error}`);
+    }
+
+    return response.json();
+  },
+};
+
+// Despachos
+export const despachosAPI = {
+  // Obtener todos los despachos
+  obtenerTodos: async () => {
+    const response = await fetch(`${API_DESPACHOS}/despachos`);
+    return await response.json();
+  },
+
+  // Crear un nuevo despacho
+  crearDespacho: async (despachoData: any) => {
+    const response = await fetch(`${API_DESPACHOS}/despachos`, {
+      method: "POST",
+      headers: getHeaders(),
+      body: JSON.stringify(despachoData),
+    });
+    return await response.json();
+  },
+
+  // Obtener un despacho por ID
+  obtenerPorId: async (id: any) => {
+    const response = await fetch(`${API_DESPACHOS}/despachos/${id}`);
+    return await response.json();
+  },
+
+  // Eliminar un despacho
+  eliminarDespacho: async (id: any) => {
+    const response = await fetch(`${API_DESPACHOS}/despachos/${id}`, {
+      method: "DELETE",
+    });
+    return await response.json();
+  },
+
+  // Obtener despachos por ID de pedido
+  obtenerPorPedido: async (idPedido: any) => {
+    const response = await fetch(
+      `${API_DESPACHOS}/despachos/pedido/${idPedido}`
+    );
+    return await response.json();
+  },
+
+  // Avanzar estado del despacho
+  avanzarEstado: async (idDespacho: any) => {
+    const response = await fetch(
+      `${API_DESPACHOS}/despachos/${idDespacho}/avanzar`,
+      {
+        method: "POST",
+      }
+    );
+    return await response.json();
+  },
+
+  // Marcar despacho como fallido
+  marcarFallido: async (idDespacho: any) => {
+    const response = await fetch(
+      `${API_DESPACHOS}/despachos/${idDespacho}/fallar`,
+      {
+        method: "POST",
+      }
+    );
+    return await response.json();
+  },
+
+  // Reiniciar despacho
+  reiniciarDespacho: async (idDespacho: any) => {
+    const response = await fetch(
+      `${API_DESPACHOS}/despachos/${idDespacho}/reiniciar`,
+      {
+        method: "POST",
+      }
+    );
+    return await response.json();
+  },
+};
+
+// API de Cobros
+export const cobrosAPI = {
+  // Crear cobro
+  createCobro: async (cobroData: {
+    idPedido: number;
+    monto: number;
+    metodoPago: string;
+    referenciaPago: string;
+    datosPago?: any;
+  }) => {
+    const response = await fetch(`${API_COBROS}/cobros`, {
+      method: "POST",
+      headers: getHeaders(),
+      body: JSON.stringify(cobroData),
+    });
+
+    if (!response.ok) {
+      const error = await response.text();
+      throw new Error(`Error al crear cobro: ${error}`);
+    }
+
+    return response.json();
+  },
+
+  // Obtener cobro por ID
+  getCobroById: async (cobroId: number) => {
+    const response = await fetch(`${API_COBROS}/cobros/${cobroId}`, {
+      headers: getHeaders(),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Error al obtener cobro: ${response.status}`);
+    }
+
+    return response.json();
+  },
+
+  // Obtener cobro por ID de pedido
+  getCobroByPedidoId: async (pedidoId: number) => {
+    const response = await fetch(`${API_COBROS}/cobros/pedido/${pedidoId}`, {
+      headers: getHeaders(),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Error al obtener cobro del pedido: ${response.status}`);
+    }
+
+    return response.json();
+  },
+
+  // Procesar cobro
+  procesarCobro: async (cobroId: number) => {
+    const response = await fetch(`${API_COBROS}/cobros/${cobroId}/procesar`, {
+      method: "POST",
+      headers: getHeaders(),
+    });
+
+    if (!response.ok) {
+      const error = await response.text();
+      throw new Error(`Error al procesar cobro: ${error}`);
+    }
+
+    return response.json();
+  },
+
+  // Marcar cobro como fallido
+  marcarCobroFallido: async (cobroId: number) => {
+    const response = await fetch(`${API_COBROS}/cobros/${cobroId}/fallar`, {
+      method: "POST",
+      headers: getHeaders(),
+    });
+
+    if (!response.ok) {
+      const error = await response.text();
+      throw new Error(`Error al marcar cobro como fallido: ${error}`);
+    }
+
+    return response.json();
+  },
+
+  // Obtener todos los cobros
+  getAllCobros: async () => {
+    const response = await fetch(`${API_COBROS}/cobros`, {
+      headers: getHeaders(),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Error al obtener cobros: ${response.status}`);
+    }
+
+    return response.json();
   },
 };

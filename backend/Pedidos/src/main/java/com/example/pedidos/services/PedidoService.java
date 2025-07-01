@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,6 +15,9 @@ import com.example.pedidos.models.dto.LineaPedidoDTO;
 import com.example.pedidos.repositories.PedidoRepository;
 import com.example.pedidos.state.EstadoFactory;
 import com.example.pedidos.state.EstadoPedidoState;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 @Service
 public class PedidoService {
@@ -110,5 +114,17 @@ public class PedidoService {
                     return true;
                 })
                 .orElse(false);
+    }
+
+    public List<Pedido> obtenerPedidosPorCliente(Long clienteId) {
+        return pedidoRepository.findByIdClienteAndEliminadoFalse(clienteId);
+    }
+
+    public Page<Pedido> listarPedidosPaginados(Pageable pageable) {
+        return pedidoRepository.findByEliminadoFalse(pageable);
+    }
+
+    public Page<Pedido> obtenerPedidosPorClientePaginados(Long clienteId, Pageable pageable) {
+        return pedidoRepository.findByIdClienteAndEliminadoFalse(clienteId, pageable);
     }
 }
